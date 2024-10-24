@@ -16,8 +16,7 @@ public class CytoscapeController {
 
     @GetMapping("/getdata")
     public ResponseEntity<String> getData() {
-        String result = cytoscapeService.getData();
-
+        String result = cytoscapeService.getCompanyData();
         return ResponseEntity.ok(result);
     }
 }

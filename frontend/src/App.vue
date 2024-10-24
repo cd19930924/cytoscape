@@ -1,15 +1,15 @@
 <template>
   <div id="app">
-    <CytoscapeGraph />
+    <CompanyInOut />
   </div>
 </template>
 
 <script>
-import CytoscapeGraph from './components/Graph.vue'; 
+import CompanyInOut from './components/CompanyInOut.vue'; 
 
 export default {
   components: {
-    CytoscapeGraph
+    CompanyInOut
   }
 }
 </script>
