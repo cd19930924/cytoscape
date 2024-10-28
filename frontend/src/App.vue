@@ -1,34 +1,66 @@
 <template>
   <div id="app">
-    <button @click="currentPage = 'company'">公司進出口資料</button>
-    <button @click="currentPage = 'social'">社交朋友圈資料</button>
+    <button @click="setGraphConfig('companydata', 'concentric')">公司進出口資料圖1</button>
+    <button @click="setGraphConfig('getdata', 'preset')">公司進出口資料圖2</button>
+    <button @click="setGraphConfig('getdata', 'circle')">公司進出口資料圖3</button>
+    <button @click="setGraphConfig('socialdata', 'cose')">社交圈資料圖</button>
 
-    <company-in-out ref="company" v-if="currentPage === 'company'" />
-    <social-circle ref="social" v-if="currentPage === 'social'" />
+    <company-in-out
+      ref="companyInOut"
+      :apiEndpoint="apiEndpoint"
+      :layoutName="layoutName"
+      v-if="showGraph"
+    />
+    <social-circles
+      ref="socialCircles"
+      v-if="showSocialGraph"
+      :apiEndpoint="apiEndpoint"
+      :layoutName="layoutName"
+    />
   </div>
 </template>
 
 <script>
-  import companyInOut from './components/CompanyInOut.vue';
-  import socialCircle from './components/SocialCircles.vue';
+  import CompanyInOut from './components/CompanyInOut.vue';
+  import SocialCircles from './components/SocialCircles.vue';
 
   export default {
+    components: {
+      CompanyInOut,
+      SocialCircles,
+    },
+    
     data() {
       return {
-        currentPage: 'company', 
+        apiEndpoint: 'companydata',
+        layoutName: 'concentric',
+        showGraph: true,
+        showSocialGraph: false,
       };
     },
-    components: {
-      companyInOut,
-      socialCircle,
-    },
-    watch: {
-      currentPage(newPage) {
-        // 確保在頁面切換時呼叫相應的 fetchGraphData 方法
-        if (this.$refs[newPage]) {
-          this.$refs[newPage].fetchGraphData();
+
+    methods: {
+      setGraphConfig(api, layout) {
+        this.apiEndpoint = api;
+        this.layoutName = layout;
+
+        if (api === 'socialdata') {
+          this.showGraph = false; // 隱藏 CompanyInOut
+          this.showSocialGraph = true; // 顯示 SocialCircles
+        } else {
+          this.showGraph = true; // 顯示 CompanyInOut
+          this.showSocialGraph = false; // 隱藏 SocialCircles
         }
-      }
+
+        this.$nextTick(() => {
+          if (this.showGraph) {
+            this.$refs.companyInOut.fetchGraphData(); // 刷新 CompanyInOut
+          }
+          if (this.showSocialGraph) {
+            this.$refs.socialCircles.fetchGraphData(); // 刷新 SocialCircles
+          }
+        });
+      },
     },
   };
 </script>

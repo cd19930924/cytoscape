@@ -6,21 +6,35 @@
 
 <script>
   import cytoscape from "cytoscape";
-  import { ref, onMounted } from "vue";
+  import { ref, onMounted, toRefs, defineComponent } from "vue";
 
-  export default {
+  export default defineComponent({
     name: "SocialCircles",
-    setup() {
+
+    props: {
+      apiEndpoint: {
+        type: String,
+        required: true,
+      },
+      layoutName: {
+        type: String,
+        required: true,
+      },
+    },
+    
+    setup(props) {
+      const { apiEndpoint, layoutName } = toRefs(props);
       const cyRef = ref(null);
       const isGraphVisible = ref(false);
       let cy = null;
 
       async function fetchGraphData() {
         try {
-          const response = await fetch("http://localhost:8080/api/socialdata");
+          const response = await fetch(`http://localhost:8080/api/${apiEndpoint.value}`);
           const graphData = await response.json();
           isGraphVisible.value = true;
           initCytoscape(graphData);
+
         } catch (error) {
           console.error("Error fetching social circles data:", error);
         }
@@ -30,6 +44,7 @@
         if (cy) {
           cy.destroy();
         }
+        
         cy = cytoscape({
           container: cyRef.value,
           elements: data.elements,
@@ -37,36 +52,61 @@
             {
               selector: "node",
               style: {
-                "background-color": "#666",
+                "background-color": "#4CAF50",
                 label: "data(id)",
                 "text-valign": "center",
                 "text-halign": "center",
-                color: "#fff",
-                "width": "50px",
-                "height": "50px",
+                color: "#ffffff",
+                "font-size": "12px",
+                "border-width": 2,
+                "border-color": "#2c3e50",
+                "width": "60px",
+                "height": "60px",
+                "shadow-color": "#000000",
+                "shadow-blur": 10,
+                "shadow-offset-x": 2,
+                "shadow-offset-y": 2,
               },
             },
             {
               selector: "edge",
               style: {
-                "width": 3,
-                "line-color": "#ccc",
-                "target-arrow-color": "#ccc",
+                "width": 4,
+                "line-color": "#3498db",
+                "target-arrow-color": "#3498db",
                 "target-arrow-shape": "triangle",
+                "opacity": 0.7,
+                "curve-style": "bezier",
+                "arrow-scale": 1.5,
+              },
+            },
+            {
+              selector: "node:selected",
+              style: {
+                "background-color": "#e74c3c",
+                "border-color": "#c0392b",
+              },
+            },
+            {
+              selector: "edge:selected",
+              style: {
+                "line-color": "#e74c3c",
+                "target-arrow-color": "#e74c3c",
               },
             },
           ],
+
           layout: {
-            name: "cose", // 使用適合的佈局
+            name: layoutName.value,
             padding: 30,
           },
         });
 
-        this.cy.fit(); // 自動調整圖形到可見範圍
+        cy.fit();
       }
 
       onMounted(() => {
-        fetchGraphData(); // 在組件加載時調用
+        fetchGraphData();
       });
 
       return {
@@ -75,13 +115,13 @@
         isGraphVisible,
       };
     },
-  };
+  });
 </script>
 
 <style>
   .cy {
     width: 100%;
     height: 600px;
-    margin: auto; /* 使容器居中 */
+    margin: auto;
   }
 </style>

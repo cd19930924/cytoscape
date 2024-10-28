@@ -9,25 +9,35 @@
 
   export default {
     name: 'CompanyInOut',
+
+    props: {
+      apiEndpoint: String,
+      layoutName: String,
+    },
+
     data() {
       return {
         cy: null,
       };
     },
+
     mounted() {
-      this.fetchGraphData(); // 在組件加載時呼叫 fetchGraphData
+      this.fetchGraphData();
     },
+
     methods: {
       async fetchGraphData() {
         try {
-          const response = await fetch('http://localhost:8080/api/companydata');
+          const response = await fetch(`http://localhost:8080/api/${this.apiEndpoint}`);
           const graphData = await response.json();
           this.initCytoscape(graphData);
         } catch (error) {
           console.error('Error fetching graph data:', error);
         }
       },
+
       initCytoscape(data) {
+        if (this.cy) this.cy.destroy();
         this.cy = cytoscape({
           container: this.$refs.cyRef,
           elements: data.elements,
@@ -35,14 +45,8 @@
             {
               selector: 'node',
               style: {
-                "background-color": function (ele) {
-                  return ele.data("id") === "a1" ? "#fa39cd" : "yellow";
-                },
-                label: function (ele) {
-                  return ele.data("banNm") !== null
-                    ? ele.data("banNm")
-                    : ele.data("node");
-                },
+                "background-color": ele => (ele.data("id") === "a1" ? "#fa39cd" : "yellow"),
+                label: ele => (ele.data("banNm") ? ele.data("banNm") : ele.data("node")),
                 "text-valign": "center",
                 "text-wrap": "none",
                 "text-max-width": 70,
@@ -55,12 +59,8 @@
               selector: 'edge',
               style: {
                 width: 1,
-                "line-color": function (ele) {
-                  return ele._private.data.edge_color == "pink" ? "#e344d8" : "blue";
-                },
-                "mid-target-arrow-color": function (ele) {
-                  return ele._private.data.arrow === "buy" ? "orange" : "#31B404";
-                },
+                "line-color": ele => (ele._private.data.edge_color === "pink" ? "#e344d8" : "blue"),
+                "mid-target-arrow-color": ele => (ele._private.data.arrow === "buy" ? "orange" : "#31B404"),
                 "mid-target-arrow-shape": "triangle",
                 "curve-style": "bezier",
                 "control-point-step-size": 15,
@@ -97,27 +97,38 @@
               },
             },
           ],
+
           layout: {
-            name: 'concentric',
+            name: this.layoutName,
             rows: 1,
-            padding: 1,
+            padding: 10,
             minNodeSpacing: 40,
             spacingFactor: 0.7,
             directed: true,
           },
+
           wheelSensitivity: 0.1,
           minZoom: 0.3,
         });
-        this.cy.fit(); // 自動調整圖形到可見範圍
-      }
-    }
+
+        this.cy.fit();
+      },
+    },
+    
+    watch: {
+      apiEndpoint: 'fetchGraphData',
+      layoutName(newLayout) {
+        if (this.cy) this.cy.layout({ name: newLayout }).run();
+      },
+    },
   };
 </script>
 
 <style>
   .cy {
-    width: 100%;
-    height: 600px;
-    position: relative;
+    width: 80%;
+    height: 100%;
+    position: absolute;
+    border: 1px solid #ddd;
   }
 </style>
