@@ -1,6 +1,5 @@
 <template>
   <div>
-    <button class="fetch-button" @click="fetchGraphData">公司進出口資料</button>
     <div class="cy" ref="cyRef"></div>
   </div>
 </template>
@@ -15,10 +14,13 @@
         cy: null,
       };
     },
+    mounted() {
+      this.fetchGraphData(); // 在組件加載時呼叫 fetchGraphData
+    },
     methods: {
       async fetchGraphData() {
         try {
-          const response = await fetch('http://localhost:8080/api/getdata');
+          const response = await fetch('http://localhost:8080/api/companydata');
           const graphData = await response.json();
           this.initCytoscape(graphData);
         } catch (error) {
@@ -117,25 +119,5 @@
     width: 100%;
     height: 600px;
     position: relative;
-  }
-
-  .fetch-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 20px;
-    transition: background-color 0.3s ease;
-  }
-
-  .fetch-button:hover {
-    background-color: #45a049;
-  }
-
-  .fetch-button:active {
-    background-color: #3e8e41;
   }
 </style>

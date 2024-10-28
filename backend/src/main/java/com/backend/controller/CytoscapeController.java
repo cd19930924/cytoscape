@@ -14,9 +14,16 @@ public class CytoscapeController {
     @Autowired
     CytoscapeService cytoscapeService;
 
-    @GetMapping("/getdata")
+    @GetMapping("/companydata")
     public ResponseEntity<String> getData() {
         String result = cytoscapeService.getCompanyData();
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/socialdata")
+    public ResponseEntity<String> getSocialData() {
+        String result = cytoscapeService.getSocialData();
+        return ResponseEntity.ok(result);
+    }
+
 }
